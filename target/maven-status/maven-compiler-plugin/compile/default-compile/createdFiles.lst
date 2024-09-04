@@ -1,16 +1,1 @@
-kh\com\acledabank\DbProperties.class
-kh\com\acledabank\builder\getContentById\GetContentByIdDescriptionResponseDto.class
-kh\com\acledabank\Application.class
-kh\com\acledabank\builder\getContentById\GetContentByIdYoutubeResponseDto.class
-kh\com\acledabank\RestTemplateConfiguration.class
-kh\com\acledabank\builder\getContentById\GetContentByIdMediaResponseDto.class
-kh\com\acledabank\utility\Telegram.class
-kh\com\acledabank\builder\getContentById\GetContentByIdResponseDto.class
-kh\com\acledabank\utility\Telegram$1.class
-kh\com\acledabank\builder\getContentById\GetContentByIdResponse.class
 META-INF\spring-configuration-metadata.json
-kh\com\acledabank\service\BackendService.class
-kh\com\acledabank\WebConfig.class
-kh\com\acledabank\utility\CustomHeaderFilter.class
-kh\com\acledabank\controller\ServiceController.class
-kh\com\acledabank\utility\CurrentDateTime.class

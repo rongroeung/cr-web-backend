@@ -26,7 +26,7 @@
 	</appender>
 
 	<!-- CR_Web_Backend Services Logger -->
-	<logger name="kh.com.acledabank.service.BackendService"
+	<logger name="kh.com.crossroads.service.BackendService"
 		level="info" additivity="false">
 		<appender-ref ref="CR_Web_Backend_Log" />
 		<appender-ref ref="Console" />

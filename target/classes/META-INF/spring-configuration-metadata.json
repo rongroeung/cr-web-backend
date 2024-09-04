@@ -1,0 +1,37 @@
+{
+  "groups": [
+    {
+      "name": "db",
+      "type": "kh.com.acledabank.DbProperties",
+      "sourceType": "kh.com.acledabank.DbProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "db.host",
+      "type": "java.lang.String",
+      "sourceType": "kh.com.acledabank.DbProperties"
+    },
+    {
+      "name": "db.name",
+      "type": "java.lang.String",
+      "sourceType": "kh.com.acledabank.DbProperties"
+    },
+    {
+      "name": "db.password",
+      "type": "java.lang.String",
+      "sourceType": "kh.com.acledabank.DbProperties"
+    },
+    {
+      "name": "db.port",
+      "type": "java.lang.String",
+      "sourceType": "kh.com.acledabank.DbProperties"
+    },
+    {
+      "name": "db.username",
+      "type": "java.lang.String",
+      "sourceType": "kh.com.acledabank.DbProperties"
+    }
+  ],
+  "hints": []
+}

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<property name="Path_Log" value="logs" />
+
+	<!-- Console Appender -->
+	<appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+	    <encoder>
+	        <Pattern>%white(%d{ISO8601}) %X{ExchangeId} %highlight%cyan(%-5level) [%green(%t)] %yellow(%C{1.}): %msg%n%throwable</Pattern>
+	    </encoder>
+	</appender>
+
+	<!-- CR_Web_Backend Log Appender -->
+	<appender name="CR_Web_Backend_Log"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${Path_Log}/CR_Web_Backend.log</file>
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<fileNamePattern>logs/archived/CR_Web_Backend/CR_Web_Backend.%d{yyyy-MM-dd}.%i.log
+			</fileNamePattern>
+			<maxFileSize>500MB</maxFileSize>
+			<maxHistory>500</maxHistory>
+		</rollingPolicy>
+		<encoder>
+	        <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %replace(%replace(%msg){'&lt;web:cm_password&gt;(.*?)&lt;/web:cm_password&gt;','&lt;web:cm_password&gt;******&lt;/web:cm_password&gt;'}){'&lt;web:cm_user_name&gt;(.*?)&lt;/web:cm_user_name&gt;','&lt;web:cm_user_name&gt;******&lt;/web:cm_user_name&gt;'}</pattern>
+	    </encoder>
+	</appender>
+
+	<!-- CR_Web_Backend Services Logger -->
+	<logger name="kh.com.acledabank.service.BackendService"
+		level="info" additivity="false">
+		<appender-ref ref="CR_Web_Backend_Log" />
+		<appender-ref ref="Console" />
+	</logger>
+
+	<!-- Root Logger -->
+	<root level="info">
+		<appender-ref ref="CR_Web_Backend_Log" />
+		<appender-ref ref="Console" />
+	</root>
+</configuration>

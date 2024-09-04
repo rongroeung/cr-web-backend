@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  crweb-backend-service:
+    image: cr-web-backend:1.0.0
+    env_file:
+      - .env
+    restart: always  # Optional: configure restart policy
+    ports:
+      - "7001:8080"  # Bind host port 7001 to container port 8080

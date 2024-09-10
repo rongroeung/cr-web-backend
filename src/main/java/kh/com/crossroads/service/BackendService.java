@@ -18,6 +18,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import kh.com.crossroads.DbProperties;
+import kh.com.crossroads.builder.getContentAllLangById.GetContentAllLangByIdDescriptionResponseDto;
+import kh.com.crossroads.builder.getContentAllLangById.GetContentAllLangByIdMediaResponseDto;
+import kh.com.crossroads.builder.getContentAllLangById.GetContentAllLangByIdResponse;
+import kh.com.crossroads.builder.getContentAllLangById.GetContentAllLangByIdResponseDto;
+import kh.com.crossroads.builder.getContentAllLangById.GetContentAllLangByIdYoutubeResponseDto;
 import kh.com.crossroads.builder.getContentById.GetContentByIdDescriptionResponseDto;
 import kh.com.crossroads.builder.getContentById.GetContentByIdMediaResponseDto;
 import kh.com.crossroads.builder.getContentById.GetContentByIdResponse;
@@ -165,5 +170,126 @@ public class BackendService {
 		}
 		
 		return new ResponseEntity<GetContentByIdResponse>(response, HttpStatus.OK);
+	}
+	
+	@SuppressWarnings({ "rawtypes" })
+	@ResponseBody
+	public ResponseEntity GetContentAllLangById(String id) {
+		// Write log
+		log.info("=======> GetContentAllLangById Request: id=" + id + "\r\n");
+		GetContentAllLangByIdResponse response = new GetContentAllLangByIdResponse();
+		GetContentAllLangByIdResponseDto responseDto = new GetContentAllLangByIdResponseDto();
+		ArrayList<GetContentAllLangByIdDescriptionResponseDto> descriptions = new ArrayList<>();
+		ArrayList<GetContentAllLangByIdMediaResponseDto> medium = new ArrayList<>();
+		ArrayList<GetContentAllLangByIdYoutubeResponseDto> youtubes = new ArrayList<>();
+		
+		String queryContent = "SELECT * FROM tbl_content WHERE id = '" + id + "'";
+		String queryDescription = "SELECT * FROM tbl_description WHERE content_id = '" + id + "'";
+		String queryMedia = "SELECT * FROM tbl_media WHERE content_id = '" + id + "'";
+		String queryYoutube = "SELECT * FROM tbl_youtube WHERE content_id = '" + id + "'";
+		
+		try {
+			
+			Class.forName("org.postgresql.Driver");
+			Connection connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
+			Statement statement = connection.createStatement();
+			ResultSet resultSet;
+			
+			// Get Content from DB
+			resultSet = statement.executeQuery(queryContent);
+			while (resultSet.next()) {
+				responseDto.setId(resultSet.getString("id"));
+				responseDto.setTitle(resultSet.getString("title"));
+				responseDto.setKh_title(resultSet.getString("kh_title"));
+				responseDto.setSub_title(resultSet.getString("sub_title"));
+				responseDto.setKh_sub_title(resultSet.getString("kh_sub_title"));
+			}
+			
+			// Validate content id not found
+			if (responseDto.getId() == null) {
+				// Close DB connection
+				statement.close();
+				connection.close();
+				
+				response.setCode(404);
+				response.setMessage("Content ID not found");
+				
+				// Write log
+				try {
+					log.info("=======> GetContentAllLangById Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+				} catch (JsonProcessingException e2) {
+					e2.printStackTrace();
+				}
+				
+				return new ResponseEntity<GetContentAllLangByIdResponse>(response, HttpStatus.NOT_FOUND);
+			}
+			
+			// Get Description from DB
+			resultSet = statement.executeQuery(queryDescription);
+			while (resultSet.next()) {
+				GetContentAllLangByIdDescriptionResponseDto description = new GetContentAllLangByIdDescriptionResponseDto();
+				description.setId(resultSet.getString("id"));
+				description.setText(resultSet.getString("text"));
+				description.setKh_text(resultSet.getString("kh_text"));
+				descriptions.add(description);
+			}
+			
+			// Get Media from DB
+			resultSet = statement.executeQuery(queryMedia);
+			while (resultSet.next()) {
+				GetContentAllLangByIdMediaResponseDto media = new GetContentAllLangByIdMediaResponseDto();
+				media.setId(resultSet.getString("id"));
+				media.setUrl(resultSet.getString("url"));
+				media.setName(resultSet.getString("name"));
+				medium.add(media);
+			}
+			
+			// Get Youtube from DB
+			resultSet = statement.executeQuery(queryYoutube);
+			while (resultSet.next()) {
+				GetContentAllLangByIdYoutubeResponseDto youtube = new GetContentAllLangByIdYoutubeResponseDto();
+				youtube.setId(resultSet.getString("id"));
+				youtube.setTitle(resultSet.getString("title"));
+				youtube.setKh_title(resultSet.getString("kh_title"));
+				youtube.setVideo_url(resultSet.getString("video_url"));
+				youtube.setDuration(resultSet.getString("duration"));
+				youtube.setPublish_date(resultSet.getString("publish_date"));
+				youtube.setThumbnail_url(resultSet.getString("thumbnail_url"));
+				youtube.setThumbnail_name(resultSet.getString("thumbnail_name"));
+				youtubes.add(youtube);
+			}
+			
+			statement.close();
+			connection.close();
+
+		} catch (SQLException | ClassNotFoundException e) {
+			response.setCode(500);
+			response.setMessage(e.getMessage());
+			
+			// Write log
+			try {
+				log.info("=======> GetContentAllLangById Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+			} catch (JsonProcessingException e2) {
+				e2.printStackTrace();
+			}
+			
+			return new ResponseEntity<GetContentAllLangByIdResponse>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
+		responseDto.setDescription(descriptions);
+		responseDto.setMedia(medium);
+		responseDto.setYoutube(youtubes);
+		response.setCode(200);
+		response.setMessage("Success");
+		response.setData(responseDto);
+		
+		// Write log
+		try {
+			log.info("=======> GetContentAllLangById Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		
+		return new ResponseEntity<GetContentAllLangByIdResponse>(response, HttpStatus.OK);
 	}
 }

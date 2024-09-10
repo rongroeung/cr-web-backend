@@ -16,6 +16,12 @@ public class ServiceController {
 	BackendService backend;
 	
 	@SuppressWarnings("rawtypes")
+	@GetMapping(value = "/cr-web-backend/api/v1/getAllContentId", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity GetAllContentId() {
+		return backend.GetAllContentId();
+	}
+	
+	@SuppressWarnings("rawtypes")
 	@GetMapping(value = "/cr-web-backend/api/v1/getContentById", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity GetContentById(@RequestParam("id") String id, @RequestParam(name = "lang", required = false) String lang) {
 		// Set lang = 'en' if lang was not input

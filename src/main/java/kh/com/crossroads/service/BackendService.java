@@ -18,6 +18,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import kh.com.crossroads.DbProperties;
+import kh.com.crossroads.builder.getAllContentId.GetAllContentIdResponse;
+import kh.com.crossroads.builder.getAllContentId.GetAllContentIdResponseDto;
 import kh.com.crossroads.builder.getContentAllLangById.GetContentAllLangByIdDescriptionResponseDto;
 import kh.com.crossroads.builder.getContentAllLangById.GetContentAllLangByIdMediaResponseDto;
 import kh.com.crossroads.builder.getContentAllLangById.GetContentAllLangByIdResponse;
@@ -48,6 +50,62 @@ public class BackendService {
 		this.dbUsername = pDb.getUsername();
 		this.dbPassword = pDb.getPassword();
 		this.dbUrl = "jdbc:postgresql://" + dbHost + ":" + dbPort + "/" + dbName;
+	}
+	
+	@SuppressWarnings({ "rawtypes" })
+	@ResponseBody
+	public ResponseEntity GetAllContentId() {
+		// Write log
+		log.info("=======> GetAllContentId Request: endpoint=/cr-web-backend/api/v1/getAllContentId\r\n");
+		GetAllContentIdResponse response = new GetAllContentIdResponse();
+		GetAllContentIdResponseDto responseDto = new GetAllContentIdResponseDto();
+		ArrayList<String> content_id = new ArrayList<>();
+		
+		String queryContent = "SELECT id FROM tbl_content ORDER BY id ASC";
+		
+		try {
+			
+			Class.forName("org.postgresql.Driver");
+			Connection connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
+			Statement statement = connection.createStatement();
+			ResultSet resultSet;
+			
+			// Get All Content ID from DB
+			resultSet = statement.executeQuery(queryContent);
+			while (resultSet.next()) {
+				content_id.add(resultSet.getString("id"));
+			}
+			
+			statement.close();
+			connection.close();
+
+		} catch (SQLException | ClassNotFoundException e) {
+			response.setCode(500);
+			response.setMessage(e.getMessage());
+			
+			// Write log
+			try {
+				log.info("=======> GetAllContentId Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+			} catch (JsonProcessingException e2) {
+				e2.printStackTrace();
+			}
+			
+			return new ResponseEntity<GetAllContentIdResponse>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
+		responseDto.setContent_id(content_id);
+		response.setCode(200);
+		response.setMessage("Success");
+		response.setData(responseDto);
+		
+		// Write log
+		try {
+			log.info("=======> GetAllContentId Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		
+		return new ResponseEntity<GetAllContentIdResponse>(response, HttpStatus.OK);
 	}
 	
 	@SuppressWarnings({ "rawtypes" })

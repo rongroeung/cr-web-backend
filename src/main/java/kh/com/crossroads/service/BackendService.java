@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import kh.com.crossroads.DbProperties;
@@ -30,6 +31,11 @@ import kh.com.crossroads.builder.getContentById.GetContentByIdMediaResponseDto;
 import kh.com.crossroads.builder.getContentById.GetContentByIdResponse;
 import kh.com.crossroads.builder.getContentById.GetContentByIdResponseDto;
 import kh.com.crossroads.builder.getContentById.GetContentByIdYoutubeResponseDto;
+import kh.com.crossroads.builder.updateContentById.UpdateContentByIdDescriptionRequestDto;
+import kh.com.crossroads.builder.updateContentById.UpdateContentByIdMediaRequestDto;
+import kh.com.crossroads.builder.updateContentById.UpdateContentByIdRequest;
+import kh.com.crossroads.builder.updateContentById.UpdateContentByIdResponse;
+import kh.com.crossroads.builder.updateContentById.UpdateContentByIdYoutubeRequestDto;
 
 @Service
 public class BackendService {
@@ -349,5 +355,117 @@ public class BackendService {
 		}
 		
 		return new ResponseEntity<GetContentAllLangByIdResponse>(response, HttpStatus.OK);
+	}
+	
+	@SuppressWarnings({ "rawtypes" })
+	@ResponseBody
+	public ResponseEntity UpdateContentById(String req) {
+		// Write log
+		log.info("=======> UpdateContentById Request: " + req + "\r\n");
+		UpdateContentByIdResponse response = new UpdateContentByIdResponse();
+		UpdateContentByIdRequest request = new UpdateContentByIdRequest();
+		try {
+			request = objectMapper.readValue(req, UpdateContentByIdRequest.class);
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		String updateContent = ""
+				+ "UPDATE tbl_content "
+				+ "SET "
+				+ "title = '" + request.getTitle() + "', "
+				+ "kh_title = '" + request.getKh_title() + "', "
+				+ "sub_title = '" + request.getSub_title() + "', "
+				+ "kh_sub_title = '" + request.getKh_sub_title() + "' "
+				+ "WHERE "
+				+ "id = '" + request.getId() + "';";
+		String updateDescription = "";
+		String updateMedia = "";
+		String updateYoutube = "";
+		
+		if (request.getDescription().size() != 0) {
+			for (UpdateContentByIdDescriptionRequestDto description : request.getDescription()) {
+				updateDescription += ""
+						+ "UPDATE tbl_description "
+						+ "SET "
+						+ "text = '" + description.getText() + "', "
+						+ "kh_text = '" + description.getKh_text() + "' "
+						+ "WHERE "
+						+ "id = '" + description.getId() + "';";
+			}
+		}
+		if (request.getMedia().size() != 0) {
+			for (UpdateContentByIdMediaRequestDto media : request.getMedia()) {
+				updateMedia += ""
+						+ "UPDATE tbl_media "
+						+ "SET "
+						+ "url = '" + media.getUrl() + "', "
+						+ "name = '" + media.getName() + "' "
+						+ "WHERE "
+						+ "id = '" + media.getId() + "';";
+			}
+		}
+		if (request.getYoutube().size() != 0) {
+			for (UpdateContentByIdYoutubeRequestDto youtube : request.getYoutube()) {
+				updateYoutube += ""
+						+ "UPDATE tbl_youtube "
+						+ "SET "
+						+ "title = '" + youtube.getTitle() + "', "
+						+ "kh_title = '" + youtube.getKh_title() + "', "
+						+ "video_url = '" + youtube.getVideo_url() + "', "
+						+ "duration = '" + youtube.getDuration() + "', "
+						+ "publish_date = '" + youtube.getPublish_date() + "', "
+						+ "thumbnail_url = '" + youtube.getThumbnail_url() + "', "
+						+ "thumbnail_name = '" + youtube.getThumbnail_name() + "'"
+						+ "WHERE "
+						+ "id = '" + youtube.getId() + "';";
+			}
+		}
+		
+		String updateScripts = "BEGIN;" + updateContent + updateDescription + updateMedia + updateYoutube + "COMMIT;";
+		// Write log
+		log.info("=======> UpdateContentById DB Script Request:\r\n" + updateScripts + "\r\n");
+		
+		try {
+			
+			Class.forName("org.postgresql.Driver");
+			Connection connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
+			// Create a statement for batch execution
+			Statement statement = connection.createStatement();
+			// Execute the script
+			statement.execute(updateScripts);
+			
+			statement.close();
+			connection.close();
+
+		} catch (SQLException | ClassNotFoundException e) {
+			response.setCode(500);
+			response.setMessage(e.getMessage());
+			
+			// Write log
+			try {
+				log.info("=======> UpdateContentById Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+			} catch (JsonProcessingException e2) {
+				e2.printStackTrace();
+			}
+			
+			return new ResponseEntity<UpdateContentByIdResponse>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
+		response.setCode(200);
+		response.setMessage("Success");
+		
+		// Write log
+		try {
+			log.info("=======> UpdateContentById Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		
+		return new ResponseEntity<UpdateContentByIdResponse>(response, HttpStatus.OK);
 	}
 }

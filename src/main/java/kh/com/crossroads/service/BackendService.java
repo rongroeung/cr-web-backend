@@ -2,6 +2,7 @@ package kh.com.crossroads.service;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -374,59 +375,61 @@ public class BackendService {
 			e.printStackTrace();
 		}
 		
-		String updateContent = ""
-				+ "UPDATE tbl_content "
+		String content_id = request.getId();
+		String updateContent = "UPDATE tbl_content "
 				+ "SET "
 				+ "title = '" + request.getTitle() + "', "
 				+ "kh_title = '" + request.getKh_title() + "', "
 				+ "sub_title = '" + request.getSub_title() + "', "
 				+ "kh_sub_title = '" + request.getKh_sub_title() + "' "
-				+ "WHERE "
-				+ "id = '" + request.getId() + "';";
+				+ "WHERE id = '" + content_id + "';";
 		String updateDescription = "";
 		String updateMedia = "";
 		String updateYoutube = "";
 		
-		if (request.getDescription().size() != 0) {
-			for (UpdateContentByIdDescriptionRequestDto description : request.getDescription()) {
-				updateDescription += ""
-						+ "UPDATE tbl_description "
-						+ "SET "
-						+ "text = '" + description.getText() + "', "
-						+ "kh_text = '" + description.getKh_text() + "' "
-						+ "WHERE "
-						+ "id = '" + description.getId() + "';";
+		try {
+			if (request.getDescription().size() != 0) {
+				for (UpdateContentByIdDescriptionRequestDto description : request.getDescription()) {
+					updateDescription += "UPDATE tbl_description "
+							+ "SET "
+							+ "text = '" + description.getText() + "', "
+							+ "kh_text = '" + description.getKh_text() + "' "
+							+ "WHERE id = '" + description.getId() + "' AND content_id = '" + content_id + "';";
+				}
 			}
-		}
-		if (request.getMedia().size() != 0) {
-			for (UpdateContentByIdMediaRequestDto media : request.getMedia()) {
-				updateMedia += ""
-						+ "UPDATE tbl_media "
-						+ "SET "
-						+ "url = '" + media.getUrl() + "', "
-						+ "name = '" + media.getName() + "' "
-						+ "WHERE "
-						+ "id = '" + media.getId() + "';";
-			}
-		}
-		if (request.getYoutube().size() != 0) {
-			for (UpdateContentByIdYoutubeRequestDto youtube : request.getYoutube()) {
-				updateYoutube += ""
-						+ "UPDATE tbl_youtube "
-						+ "SET "
-						+ "title = '" + youtube.getTitle() + "', "
-						+ "kh_title = '" + youtube.getKh_title() + "', "
-						+ "video_url = '" + youtube.getVideo_url() + "', "
-						+ "duration = '" + youtube.getDuration() + "', "
-						+ "publish_date = '" + youtube.getPublish_date() + "', "
-						+ "thumbnail_url = '" + youtube.getThumbnail_url() + "', "
-						+ "thumbnail_name = '" + youtube.getThumbnail_name() + "'"
-						+ "WHERE "
-						+ "id = '" + youtube.getId() + "';";
-			}
-		}
+		} catch (Exception e) {}
 		
-		String updateScripts = "BEGIN;" + updateContent + updateDescription + updateMedia + updateYoutube + "COMMIT;";
+		try {
+			if (request.getMedia().size() != 0) {
+				for (UpdateContentByIdMediaRequestDto media : request.getMedia()) {
+					updateMedia += "UPDATE tbl_media "
+							+ "SET "
+							+ "url = '" + media.getUrl() + "', "
+							+ "name = '" + media.getName() + "' "
+							+ "WHERE id = '" + media.getId() + "' AND content_id = '" + content_id + "';";
+				}
+			}
+		} catch (Exception e) {}
+		
+		try {
+			if (request.getYoutube().size() != 0) {
+				for (UpdateContentByIdYoutubeRequestDto youtube : request.getYoutube()) {
+					updateYoutube += "UPDATE tbl_youtube "
+							+ "SET "
+							+ "title = '" + youtube.getTitle() + "', "
+							+ "kh_title = '" + youtube.getKh_title() + "', "
+							+ "video_url = '" + youtube.getVideo_url() + "', "
+							+ "duration = '" + youtube.getDuration() + "', "
+							+ "publish_date = '" + youtube.getPublish_date() + "', "
+							+ "thumbnail_url = '" + youtube.getThumbnail_url() + "', "
+							+ "thumbnail_name = '" + youtube.getThumbnail_name() + "'"
+							+ "WHERE id = '" + youtube.getId() + "' AND content_id = '" + content_id + "';";
+				}
+			}
+		} catch (Exception e) {}
+		
+		String updateScripts = updateContent + updateDescription + updateMedia + updateYoutube;
+		String updateResult = "";
 		// Write log
 		log.info("=======> UpdateContentById DB Script Request:\r\n" + updateScripts + "\r\n");
 		
@@ -434,12 +437,17 @@ public class BackendService {
 			
 			Class.forName("org.postgresql.Driver");
 			Connection connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
-			// Create a statement for batch execution
-			Statement statement = connection.createStatement();
-			// Execute the script
-			statement.execute(updateScripts);
-			
-			statement.close();
+			// Create a prepared statement for the update script
+			PreparedStatement preparedStatement = connection.prepareStatement(updateScripts);
+			// Execute the update statement
+			int rowsAffected = preparedStatement.executeUpdate();
+			if (rowsAffected > 0) {
+				updateResult = "Record updated successfully";
+			} else {
+				updateResult = "No record found to update";
+			}
+
+			preparedStatement.close();
 			connection.close();
 
 		} catch (SQLException | ClassNotFoundException e) {
@@ -457,7 +465,7 @@ public class BackendService {
 		}
 		
 		response.setCode(200);
-		response.setMessage("Success");
+		response.setMessage(updateResult);
 		
 		// Write log
 		try {

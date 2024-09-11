@@ -20,23 +20,19 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import kh.com.crossroads.DbProperties;
+import kh.com.crossroads.builder.ContentRequest;
+import kh.com.crossroads.builder.ContentResponse;
+import kh.com.crossroads.builder.DataResponseDto;
+import kh.com.crossroads.builder.DescriptionDto;
+import kh.com.crossroads.builder.MediaDto;
+import kh.com.crossroads.builder.YoutubeDto;
 import kh.com.crossroads.builder.getAllContentId.GetAllContentIdResponse;
 import kh.com.crossroads.builder.getAllContentId.GetAllContentIdResponseDto;
-import kh.com.crossroads.builder.getContentAllLangById.GetContentAllLangByIdDescriptionResponseDto;
-import kh.com.crossroads.builder.getContentAllLangById.GetContentAllLangByIdMediaResponseDto;
-import kh.com.crossroads.builder.getContentAllLangById.GetContentAllLangByIdResponse;
-import kh.com.crossroads.builder.getContentAllLangById.GetContentAllLangByIdResponseDto;
-import kh.com.crossroads.builder.getContentAllLangById.GetContentAllLangByIdYoutubeResponseDto;
 import kh.com.crossroads.builder.getContentById.GetContentByIdDescriptionResponseDto;
 import kh.com.crossroads.builder.getContentById.GetContentByIdMediaResponseDto;
 import kh.com.crossroads.builder.getContentById.GetContentByIdResponse;
 import kh.com.crossroads.builder.getContentById.GetContentByIdResponseDto;
 import kh.com.crossroads.builder.getContentById.GetContentByIdYoutubeResponseDto;
-import kh.com.crossroads.builder.updateContentById.UpdateContentByIdDescriptionRequestDto;
-import kh.com.crossroads.builder.updateContentById.UpdateContentByIdMediaRequestDto;
-import kh.com.crossroads.builder.updateContentById.UpdateContentByIdRequest;
-import kh.com.crossroads.builder.updateContentById.UpdateContentByIdResponse;
-import kh.com.crossroads.builder.updateContentById.UpdateContentByIdYoutubeRequestDto;
 
 @Service
 public class BackendService {
@@ -127,9 +123,9 @@ public class BackendService {
 		ArrayList<GetContentByIdYoutubeResponseDto> youtubes = new ArrayList<>();
 		
 		String queryContent = "SELECT * FROM tbl_content WHERE id = '" + id + "'";
-		String queryDescription = "SELECT * FROM tbl_description WHERE content_id = '" + id + "'";
-		String queryMedia = "SELECT * FROM tbl_media WHERE content_id = '" + id + "'";
-		String queryYoutube = "SELECT * FROM tbl_youtube WHERE content_id = '" + id + "'";
+		String queryDescription = "SELECT * FROM tbl_description WHERE content_id = '" + id + "' ORDER BY id ASC";
+		String queryMedia = "SELECT * FROM tbl_media WHERE content_id = '" + id + "' ORDER BY id ASC";
+		String queryYoutube = "SELECT * FROM tbl_youtube WHERE content_id = '" + id + "' ORDER BY id ASC";
 		
 		String language = "";
 		if (lang.equals("kh")) {
@@ -242,16 +238,16 @@ public class BackendService {
 	public ResponseEntity GetContentAllLangById(String id) {
 		// Write log
 		log.info("=======> GetContentAllLangById Request: id=" + id + "\r\n");
-		GetContentAllLangByIdResponse response = new GetContentAllLangByIdResponse();
-		GetContentAllLangByIdResponseDto responseDto = new GetContentAllLangByIdResponseDto();
-		ArrayList<GetContentAllLangByIdDescriptionResponseDto> descriptions = new ArrayList<>();
-		ArrayList<GetContentAllLangByIdMediaResponseDto> medium = new ArrayList<>();
-		ArrayList<GetContentAllLangByIdYoutubeResponseDto> youtubes = new ArrayList<>();
+		ContentResponse response = new ContentResponse();
+		DataResponseDto responseDto = new DataResponseDto();
+		ArrayList<DescriptionDto> descriptions = new ArrayList<>();
+		ArrayList<MediaDto> medium = new ArrayList<>();
+		ArrayList<YoutubeDto> youtubes = new ArrayList<>();
 		
 		String queryContent = "SELECT * FROM tbl_content WHERE id = '" + id + "'";
-		String queryDescription = "SELECT * FROM tbl_description WHERE content_id = '" + id + "'";
-		String queryMedia = "SELECT * FROM tbl_media WHERE content_id = '" + id + "'";
-		String queryYoutube = "SELECT * FROM tbl_youtube WHERE content_id = '" + id + "'";
+		String queryDescription = "SELECT * FROM tbl_description WHERE content_id = '" + id + "' ORDER BY id ASC";
+		String queryMedia = "SELECT * FROM tbl_media WHERE content_id = '" + id + "' ORDER BY id ASC";
+		String queryYoutube = "SELECT * FROM tbl_youtube WHERE content_id = '" + id + "' ORDER BY id ASC";
 		
 		try {
 			
@@ -286,13 +282,13 @@ public class BackendService {
 					e2.printStackTrace();
 				}
 				
-				return new ResponseEntity<GetContentAllLangByIdResponse>(response, HttpStatus.NOT_FOUND);
+				return new ResponseEntity<ContentResponse>(response, HttpStatus.NOT_FOUND);
 			}
 			
 			// Get Description from DB
 			resultSet = statement.executeQuery(queryDescription);
 			while (resultSet.next()) {
-				GetContentAllLangByIdDescriptionResponseDto description = new GetContentAllLangByIdDescriptionResponseDto();
+				DescriptionDto description = new DescriptionDto();
 				description.setId(resultSet.getString("id"));
 				description.setText(resultSet.getString("text"));
 				description.setKh_text(resultSet.getString("kh_text"));
@@ -302,7 +298,7 @@ public class BackendService {
 			// Get Media from DB
 			resultSet = statement.executeQuery(queryMedia);
 			while (resultSet.next()) {
-				GetContentAllLangByIdMediaResponseDto media = new GetContentAllLangByIdMediaResponseDto();
+				MediaDto media = new MediaDto();
 				media.setId(resultSet.getString("id"));
 				media.setUrl(resultSet.getString("url"));
 				media.setName(resultSet.getString("name"));
@@ -312,7 +308,7 @@ public class BackendService {
 			// Get Youtube from DB
 			resultSet = statement.executeQuery(queryYoutube);
 			while (resultSet.next()) {
-				GetContentAllLangByIdYoutubeResponseDto youtube = new GetContentAllLangByIdYoutubeResponseDto();
+				YoutubeDto youtube = new YoutubeDto();
 				youtube.setId(resultSet.getString("id"));
 				youtube.setTitle(resultSet.getString("title"));
 				youtube.setKh_title(resultSet.getString("kh_title"));
@@ -338,7 +334,7 @@ public class BackendService {
 				e2.printStackTrace();
 			}
 			
-			return new ResponseEntity<GetContentAllLangByIdResponse>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<ContentResponse>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		
 		responseDto.setDescription(descriptions);
@@ -355,7 +351,202 @@ public class BackendService {
 			e.printStackTrace();
 		}
 		
-		return new ResponseEntity<GetContentAllLangByIdResponse>(response, HttpStatus.OK);
+		return new ResponseEntity<ContentResponse>(response, HttpStatus.OK);
+	}
+	
+	@SuppressWarnings({ "rawtypes" })
+	@ResponseBody
+	public ResponseEntity AddNewContent(String req) {
+		// Write log
+		log.info("=======> AddNewContent Request: " + req + "\r\n");
+		ContentResponse response = new ContentResponse();
+		ContentRequest request = new ContentRequest();
+		try {
+			request = objectMapper.readValue(req, ContentRequest.class);
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		String content_id = request.getId();
+		String insertContent = "SELECT insert_into_tbl_content('" + content_id + "', '" + request.getTitle() + "', '" + request.getKh_title() + "', '" + request.getSub_title() + "', '" + request.getKh_sub_title() + "');";
+		String insertDescription = "";
+		String insertMedia = "";
+		String insertYoutube = "";
+		
+		try {
+			if (request.getDescription().size() != 0) {
+				// Get Last ID of Description from DB
+				String lastId = "";
+				try {
+					Class.forName("org.postgresql.Driver");
+					Connection connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
+					Statement statement = connection.createStatement();
+					ResultSet resultSet;
+					resultSet = statement.executeQuery("SELECT MAX(id) FROM tbl_description");
+					while (resultSet.next()) {
+						lastId = resultSet.getString("max");
+					}
+					statement.close();
+					connection.close();
+				} catch (SQLException | ClassNotFoundException e) {
+					response.setCode(500);
+					response.setMessage(e.getMessage());
+					
+					// Write log
+					try {
+						log.info("=======> AddNewContent Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+					} catch (JsonProcessingException e2) {
+						e2.printStackTrace();
+					}
+					
+					return new ResponseEntity<ContentResponse>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+				}
+				String prefix = lastId.substring(0, 2); // Extracts prefix
+		        int number = Integer.parseInt(lastId.substring(2)); // Extracts number
+		        int i = 0;
+				
+				for (DescriptionDto description : request.getDescription()) {
+					i++;
+					String newId = prefix + String.format("%05d", number + i); // Generates new ID
+					insertDescription += "SELECT insert_into_tbl_description('" + newId + "', '" + description.getText() + "', '" + description.getKh_text() + "', '" + content_id + "');";
+				}
+			}
+		} catch (Exception e) {}
+		
+		try {
+			if (request.getMedia().size() != 0) {
+				// Get Last ID of Media from DB
+				String lastId = "";
+				try {
+					Class.forName("org.postgresql.Driver");
+					Connection connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
+					Statement statement = connection.createStatement();
+					ResultSet resultSet;
+					resultSet = statement.executeQuery("SELECT MAX(id) FROM tbl_media");
+					while (resultSet.next()) {
+						lastId = resultSet.getString("max");
+					}
+					statement.close();
+					connection.close();
+				} catch (SQLException | ClassNotFoundException e) {
+					response.setCode(500);
+					response.setMessage(e.getMessage());
+					
+					// Write log
+					try {
+						log.info("=======> AddNewContent Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+					} catch (JsonProcessingException e2) {
+						e2.printStackTrace();
+					}
+					
+					return new ResponseEntity<ContentResponse>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+				}
+				String prefix = lastId.substring(0, 2); // Extracts prefix
+		        int number = Integer.parseInt(lastId.substring(2)); // Extracts number
+		        int i = 0;
+		        
+				for (MediaDto media : request.getMedia()) {
+					i++;
+					String newId = prefix + String.format("%05d", number + i); // Generates new ID
+					insertMedia += "SELECT insert_into_tbl_media('" + newId + "', '" + media.getUrl() + "', '" + media.getName() + "', '" + content_id + "');";
+				}
+			}
+		} catch (Exception e) {}
+		
+		try {
+			if (request.getYoutube().size() != 0) {
+				// Get Last ID of Youtube from DB
+				String lastId = "";
+				try {
+					Class.forName("org.postgresql.Driver");
+					Connection connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
+					Statement statement = connection.createStatement();
+					ResultSet resultSet;
+					resultSet = statement.executeQuery("SELECT MAX(id) FROM tbl_youtube");
+					while (resultSet.next()) {
+						lastId = resultSet.getString("max");
+					}
+					statement.close();
+					connection.close();
+				} catch (SQLException | ClassNotFoundException e) {
+					response.setCode(500);
+					response.setMessage(e.getMessage());
+					
+					// Write log
+					try {
+						log.info("=======> AddNewContent Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+					} catch (JsonProcessingException e2) {
+						e2.printStackTrace();
+					}
+					
+					return new ResponseEntity<ContentResponse>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+				}
+				String prefix = lastId.substring(0, 2); // Extracts prefix
+		        int number = Integer.parseInt(lastId.substring(2)); // Extracts number
+		        int i = 0;
+		        
+				for (YoutubeDto youtube : request.getYoutube()) {
+					i++;
+					String newId = prefix + String.format("%05d", number + i); // Generates new ID
+					insertYoutube += "SELECT insert_into_tbl_youtube('" + newId + "', '" + youtube.getTitle() + "', '" + youtube.getKh_title() + "', '" + youtube.getVideo_url() + "', '" + youtube.getDuration() + "', '" + youtube.getPublish_date() + "', '" + youtube.getThumbnail_url() + "', '" + youtube.getThumbnail_name() + "', '" + content_id + "');";
+				}
+			}
+		} catch (Exception e) {}
+		
+		String insertScripts = insertContent + insertDescription + insertMedia + insertYoutube;
+		String insertResult = "";
+		// Write log
+		log.info("=======> UpdateContentById DB Script Request:\r\n" + insertScripts + "\r\n");
+		
+		try {
+			
+			Class.forName("org.postgresql.Driver");
+			Connection connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
+			Statement statement = connection.createStatement();
+			
+			// Separate insertScripts
+			for (String script : insertScripts.split(";")) {
+                String trimmedScript = script.trim();
+                if (!trimmedScript.isEmpty()) {
+                	// Write log
+                	log.info("=======> DB Script Executed: " + trimmedScript + "\r\n");
+                    statement.execute(trimmedScript);
+                }
+            }
+			insertResult = "Record added successfully";
+
+			statement.close();
+			connection.close();
+
+		} catch (SQLException | ClassNotFoundException e) {
+			response.setCode(500);
+			response.setMessage(e.getMessage());
+			
+			// Write log
+			try {
+				log.info("=======> AddNewContent Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+			} catch (JsonProcessingException e2) {
+				e2.printStackTrace();
+			}
+			
+			return new ResponseEntity<ContentResponse>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
+		response.setCode(200);
+		response.setMessage(insertResult);
+		
+		// Write log
+		try {
+			log.info("=======> AddNewContent Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		
+		return new ResponseEntity<ContentResponse>(response, HttpStatus.OK);
 	}
 	
 	@SuppressWarnings({ "rawtypes" })
@@ -363,10 +554,10 @@ public class BackendService {
 	public ResponseEntity UpdateContentById(String req) {
 		// Write log
 		log.info("=======> UpdateContentById Request: " + req + "\r\n");
-		UpdateContentByIdResponse response = new UpdateContentByIdResponse();
-		UpdateContentByIdRequest request = new UpdateContentByIdRequest();
+		ContentResponse response = new ContentResponse();
+		ContentRequest request = new ContentRequest();
 		try {
-			request = objectMapper.readValue(req, UpdateContentByIdRequest.class);
+			request = objectMapper.readValue(req, ContentRequest.class);
 		} catch (JsonMappingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -389,7 +580,7 @@ public class BackendService {
 		
 		try {
 			if (request.getDescription().size() != 0) {
-				for (UpdateContentByIdDescriptionRequestDto description : request.getDescription()) {
+				for (DescriptionDto description : request.getDescription()) {
 					updateDescription += "UPDATE tbl_description "
 							+ "SET "
 							+ "text = '" + description.getText() + "', "
@@ -401,7 +592,7 @@ public class BackendService {
 		
 		try {
 			if (request.getMedia().size() != 0) {
-				for (UpdateContentByIdMediaRequestDto media : request.getMedia()) {
+				for (MediaDto media : request.getMedia()) {
 					updateMedia += "UPDATE tbl_media "
 							+ "SET "
 							+ "url = '" + media.getUrl() + "', "
@@ -413,7 +604,7 @@ public class BackendService {
 		
 		try {
 			if (request.getYoutube().size() != 0) {
-				for (UpdateContentByIdYoutubeRequestDto youtube : request.getYoutube()) {
+				for (YoutubeDto youtube : request.getYoutube()) {
 					updateYoutube += "UPDATE tbl_youtube "
 							+ "SET "
 							+ "title = '" + youtube.getTitle() + "', "
@@ -461,7 +652,7 @@ public class BackendService {
 				e2.printStackTrace();
 			}
 			
-			return new ResponseEntity<UpdateContentByIdResponse>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<ContentResponse>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		
 		response.setCode(200);
@@ -474,6 +665,6 @@ public class BackendService {
 			e.printStackTrace();
 		}
 		
-		return new ResponseEntity<UpdateContentByIdResponse>(response, HttpStatus.OK);
+		return new ResponseEntity<ContentResponse>(response, HttpStatus.OK);
 	}
 }

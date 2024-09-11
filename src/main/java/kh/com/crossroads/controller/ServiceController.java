@@ -40,6 +40,12 @@ public class ServiceController {
 	}
 	
 	@SuppressWarnings("rawtypes")
+	@PostMapping(value = "/cr-web-backend/api/v1/addNewContent", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity AddNewContent(@RequestBody String req) {
+		return backend.AddNewContent(req);
+	}
+	
+	@SuppressWarnings("rawtypes")
 	@PostMapping(value = "/cr-web-backend/api/v1/updateContentById", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity UpdateContentById(@RequestBody String req) {
 		return backend.UpdateContentById(req);

@@ -3,7 +3,7 @@
 ## I. Build JAR File
 
 ### 1. Open Spring Tool Suite and Import Project
-#### >>> `File` > `Open Projects from File System` > Input `Project Path` > `Finish`
+#### >>> `File` > `Import...` > `Existing Projects into Workspace` > `Next` > Browse `Project Path` > `Finish`
 
 ### 2. Update Maven
 #### >>> Right Click on `Project Folder` > `Maven` > `Update Project`

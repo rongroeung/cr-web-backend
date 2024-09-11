@@ -21,6 +21,8 @@ public class CustomHeaderFilter implements Filter {
 //        httpResponse.setHeader("X-Content-Type-Options", "nosniff");
 //        httpResponse.setHeader("Content-Security-Policy", "frame-ancestors 'self'");
         httpResponse.setHeader("Access-Control-Allow-Origin", "*");
+        httpResponse.setHeader("Access-Control-Allow-Headers", "*");
+        httpResponse.setHeader("Access-Control-Allow-Methods", "*");
         chain.doFilter(request, response);
     }
 

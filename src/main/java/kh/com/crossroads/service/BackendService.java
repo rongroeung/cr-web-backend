@@ -33,6 +33,7 @@ import kh.com.crossroads.builder.getContentById.GetContentByIdMediaResponseDto;
 import kh.com.crossroads.builder.getContentById.GetContentByIdResponse;
 import kh.com.crossroads.builder.getContentById.GetContentByIdResponseDto;
 import kh.com.crossroads.builder.getContentById.GetContentByIdYoutubeResponseDto;
+import kh.com.crossroads.utility.DataManipulation;
 
 @Service
 public class BackendService {
@@ -362,7 +363,7 @@ public class BackendService {
 		ContentResponse response = new ContentResponse();
 		ContentRequest request = new ContentRequest();
 		try {
-			request = objectMapper.readValue(req, ContentRequest.class);
+			request = objectMapper.readValue(DataManipulation.replaceSingleQuote(req), ContentRequest.class);
 		} catch (JsonMappingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -557,7 +558,7 @@ public class BackendService {
 		ContentResponse response = new ContentResponse();
 		ContentRequest request = new ContentRequest();
 		try {
-			request = objectMapper.readValue(req, ContentRequest.class);
+			request = objectMapper.readValue(DataManipulation.replaceSingleQuote(req), ContentRequest.class);
 		} catch (JsonMappingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

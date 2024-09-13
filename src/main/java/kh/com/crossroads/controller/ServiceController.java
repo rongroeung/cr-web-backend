@@ -51,4 +51,22 @@ public class ServiceController {
 		return backend.UpdateContentById(req);
 	}
 	
+	@SuppressWarnings("rawtypes")
+	@PostMapping(value = "/cr-web-backend/api/v1/addNewDescription", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity AddNewDescription(@RequestBody String req) {
+		return backend.AddNewDescription(req);
+	}
+	
+	@SuppressWarnings("rawtypes")
+	@PostMapping(value = "/cr-web-backend/api/v1/addNewMedia", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity AddNewMedia(@RequestBody String req) {
+		return backend.AddNewMedia(req);
+	}
+	
+	@SuppressWarnings("rawtypes")
+	@PostMapping(value = "/cr-web-backend/api/v1/addNewYoutube", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity AddNewYoutube(@RequestBody String req) {
+		return backend.AddNewYoutube(req);
+	}
+	
 }

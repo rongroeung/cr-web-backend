@@ -501,7 +501,7 @@ public class BackendService {
 		String insertScripts = insertContent + insertDescription + insertMedia + insertYoutube;
 		String insertResult = "";
 		// Write log
-		log.info("=======> UpdateContentById DB Script Request:\r\n" + insertScripts + "\r\n");
+		log.info("=======> AddNewContent DB Script Request:\r\n" + insertScripts + "\r\n");
 		
 		try {
 			
@@ -662,6 +662,534 @@ public class BackendService {
 		// Write log
 		try {
 			log.info("=======> UpdateContentById Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		
+		return new ResponseEntity<ContentResponse>(response, HttpStatus.OK);
+	}
+	
+	@SuppressWarnings({ "rawtypes" })
+	@ResponseBody
+	public ResponseEntity AddNewDescription(String req) {
+		// Write log
+		log.info("=======> AddNewDescription Request: " + req + "\r\n");
+		ContentResponse response = new ContentResponse();
+		DataResponseDto responseDto = new DataResponseDto();
+		ContentRequest request = new ContentRequest();
+		try {
+			request = objectMapper.readValue(DataManipulation.replaceSingleQuote(req), ContentRequest.class);
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		String content_id = request.getId();
+		try {
+			Class.forName("org.postgresql.Driver");
+			Connection connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
+			Statement statement = connection.createStatement();
+			ResultSet resultSet;
+			
+			// Get Content from DB
+			resultSet = statement.executeQuery("SELECT * FROM tbl_content WHERE id = '" + content_id + "'");
+			while (resultSet.next()) {
+				responseDto.setId(resultSet.getString("id"));
+			}
+			
+			// Validate content id not found
+			if (responseDto.getId() == null) {
+				// Close DB connection
+				statement.close();
+				connection.close();
+				
+				response.setCode(404);
+				response.setMessage("Content ID not found");
+				
+				// Write log
+				try {
+					log.info("=======> AddNewDescription Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+				} catch (JsonProcessingException e2) {
+					e2.printStackTrace();
+				}
+				
+				return new ResponseEntity<ContentResponse>(response, HttpStatus.NOT_FOUND);
+			}
+		} catch (SQLException | ClassNotFoundException e) {
+			response.setCode(500);
+			response.setMessage(e.getMessage());
+			
+			// Write log
+			try {
+				log.info("=======> AddNewDescription Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+			} catch (JsonProcessingException e2) {
+				e2.printStackTrace();
+			}
+			
+			return new ResponseEntity<ContentResponse>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
+		String insertDescription = "";
+		try {
+			if (request.getDescription().size() != 0) {
+				// Get Last ID of Description from DB
+				String lastId = "";
+				try {
+					Class.forName("org.postgresql.Driver");
+					Connection connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
+					Statement statement = connection.createStatement();
+					ResultSet resultSet;
+					resultSet = statement.executeQuery("SELECT MAX(id) FROM tbl_description");
+					while (resultSet.next()) {
+						lastId = resultSet.getString("max");
+					}
+					statement.close();
+					connection.close();
+				} catch (SQLException | ClassNotFoundException e) {
+					response.setCode(500);
+					response.setMessage(e.getMessage());
+					
+					// Write log
+					try {
+						log.info("=======> AddNewDescription Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+					} catch (JsonProcessingException e2) {
+						e2.printStackTrace();
+					}
+					
+					return new ResponseEntity<ContentResponse>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+				}
+				String prefix = lastId.substring(0, 2); // Extracts prefix
+		        int number = Integer.parseInt(lastId.substring(2)); // Extracts number
+		        int i = 0;
+				
+				for (DescriptionDto description : request.getDescription()) {
+					i++;
+					String newId = prefix + String.format("%05d", number + i); // Generates new ID
+					insertDescription += "SELECT insert_into_tbl_description('" + newId + "', '" + description.getText() + "', '" + description.getKh_text() + "', '" + content_id + "');";
+				}
+			}
+		} catch (Exception e) {}
+		
+		String insertScripts = insertDescription;
+		String insertResult = "";
+		// Write log
+		log.info("=======> AddNewDescription DB Script Request:\r\n" + insertScripts + "\r\n");
+		
+		try {
+			
+			Class.forName("org.postgresql.Driver");
+			Connection connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
+			Statement statement = connection.createStatement();
+			
+			// Separate insertScripts
+			for (String script : insertScripts.split(";")) {
+                String trimmedScript = script.trim();
+                if (!trimmedScript.isEmpty()) {
+                	// Write log
+                	log.info("=======> DB Script Executed: " + trimmedScript + "\r\n");
+                    statement.execute(trimmedScript);
+                }
+            }
+			insertResult = "Record added successfully";
+
+			statement.close();
+			connection.close();
+
+		} catch (SQLException | ClassNotFoundException e) {
+			response.setCode(500);
+			response.setMessage(e.getMessage());
+			
+			// Write log
+			try {
+				log.info("=======> AddNewDescription Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+			} catch (JsonProcessingException e2) {
+				e2.printStackTrace();
+			}
+			
+			return new ResponseEntity<ContentResponse>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
+		response.setCode(200);
+		response.setMessage(insertResult);
+		
+		// Write log
+		try {
+			log.info("=======> AddNewDescription Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		
+		return new ResponseEntity<ContentResponse>(response, HttpStatus.OK);
+	}
+	
+	@SuppressWarnings({ "rawtypes" })
+	@ResponseBody
+	public ResponseEntity AddNewMedia(String req) {
+		// Write log
+		log.info("=======> AddNewMedia Request: " + req + "\r\n");
+		ContentResponse response = new ContentResponse();
+		DataResponseDto responseDto = new DataResponseDto();
+		ContentRequest request = new ContentRequest();
+		try {
+			request = objectMapper.readValue(DataManipulation.replaceSingleQuote(req), ContentRequest.class);
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		String content_id = request.getId();
+		try {
+			Class.forName("org.postgresql.Driver");
+			Connection connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
+			Statement statement = connection.createStatement();
+			ResultSet resultSet;
+			
+			// Get Content from DB
+			resultSet = statement.executeQuery("SELECT * FROM tbl_content WHERE id = '" + content_id + "'");
+			while (resultSet.next()) {
+				responseDto.setId(resultSet.getString("id"));
+			}
+			
+			// Validate content id not found
+			if (responseDto.getId() == null) {
+				// Close DB connection
+				statement.close();
+				connection.close();
+				
+				response.setCode(404);
+				response.setMessage("Content ID not found");
+				
+				// Write log
+				try {
+					log.info("=======> AddNewMedia Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+				} catch (JsonProcessingException e2) {
+					e2.printStackTrace();
+				}
+				
+				return new ResponseEntity<ContentResponse>(response, HttpStatus.NOT_FOUND);
+			}
+		} catch (SQLException | ClassNotFoundException e) {
+			response.setCode(500);
+			response.setMessage(e.getMessage());
+			
+			// Write log
+			try {
+				log.info("=======> AddNewMedia Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+			} catch (JsonProcessingException e2) {
+				e2.printStackTrace();
+			}
+			
+			return new ResponseEntity<ContentResponse>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
+		String insertMedia = "";
+		try {
+			if (request.getMedia().size() != 0) {
+				// Get Last ID of Media from DB
+				String lastId = "";
+				try {
+					Class.forName("org.postgresql.Driver");
+					Connection connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
+					Statement statement = connection.createStatement();
+					ResultSet resultSet;
+					resultSet = statement.executeQuery("SELECT MAX(id) FROM tbl_media");
+					while (resultSet.next()) {
+						lastId = resultSet.getString("max");
+					}
+					statement.close();
+					connection.close();
+				} catch (SQLException | ClassNotFoundException e) {
+					response.setCode(500);
+					response.setMessage(e.getMessage());
+					
+					// Write log
+					try {
+						log.info("=======> AddNewContent Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+					} catch (JsonProcessingException e2) {
+						e2.printStackTrace();
+					}
+					
+					return new ResponseEntity<ContentResponse>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+				}
+				String prefix = lastId.substring(0, 2); // Extracts prefix
+		        int number = Integer.parseInt(lastId.substring(2)); // Extracts number
+		        int i = 0;
+		        
+				for (MediaDto media : request.getMedia()) {
+					i++;
+					String newId = prefix + String.format("%05d", number + i); // Generates new ID
+					insertMedia += "SELECT insert_into_tbl_media('" + newId + "', '" + media.getUrl() + "', '" + media.getName() + "', '" + content_id + "');";
+				}
+			}
+		} catch (Exception e) {}
+		
+		String insertScripts = insertMedia;
+		String insertResult = "";
+		// Write log
+		log.info("=======> AddNewMedia DB Script Request:\r\n" + insertScripts + "\r\n");
+		
+		try {
+			
+			Class.forName("org.postgresql.Driver");
+			Connection connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
+			Statement statement = connection.createStatement();
+			
+			// Separate insertScripts
+			for (String script : insertScripts.split(";")) {
+                String trimmedScript = script.trim();
+                if (!trimmedScript.isEmpty()) {
+                	// Write log
+                	log.info("=======> DB Script Executed: " + trimmedScript + "\r\n");
+                    statement.execute(trimmedScript);
+                }
+            }
+			insertResult = "Record added successfully";
+
+			statement.close();
+			connection.close();
+
+		} catch (SQLException | ClassNotFoundException e) {
+			response.setCode(500);
+			response.setMessage(e.getMessage());
+			
+			// Write log
+			try {
+				log.info("=======> AddNewMedia Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+			} catch (JsonProcessingException e2) {
+				e2.printStackTrace();
+			}
+			
+			return new ResponseEntity<ContentResponse>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
+		response.setCode(200);
+		response.setMessage(insertResult);
+		
+		// Write log
+		try {
+			log.info("=======> AddNewMedia Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		
+		return new ResponseEntity<ContentResponse>(response, HttpStatus.OK);
+	}
+	
+	@SuppressWarnings({ "rawtypes" })
+	@ResponseBody
+	public ResponseEntity AddNewYoutube(String req) {
+		// Write log
+		log.info("=======> AddNewYoutube Request: " + req + "\r\n");
+		ContentResponse response = new ContentResponse();
+		DataResponseDto responseDto = new DataResponseDto();
+		ContentRequest request = new ContentRequest();
+		try {
+			request = objectMapper.readValue(DataManipulation.replaceSingleQuote(req), ContentRequest.class);
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		String content_id = request.getId();
+		try {
+			Class.forName("org.postgresql.Driver");
+			Connection connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
+			Statement statement = connection.createStatement();
+			ResultSet resultSet;
+			
+			// Get Content from DB
+			resultSet = statement.executeQuery("SELECT * FROM tbl_content WHERE id = '" + content_id + "'");
+			while (resultSet.next()) {
+				responseDto.setId(resultSet.getString("id"));
+			}
+			
+			// Validate content id not found
+			if (responseDto.getId() == null) {
+				// Close DB connection
+				statement.close();
+				connection.close();
+				
+				response.setCode(404);
+				response.setMessage("Content ID not found");
+				
+				// Write log
+				try {
+					log.info("=======> AddNewYoutube Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+				} catch (JsonProcessingException e2) {
+					e2.printStackTrace();
+				}
+				
+				return new ResponseEntity<ContentResponse>(response, HttpStatus.NOT_FOUND);
+			}
+		} catch (SQLException | ClassNotFoundException e) {
+			response.setCode(500);
+			response.setMessage(e.getMessage());
+			
+			// Write log
+			try {
+				log.info("=======> AddNewYoutube Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+			} catch (JsonProcessingException e2) {
+				e2.printStackTrace();
+			}
+			
+			return new ResponseEntity<ContentResponse>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
+		String insertYoutube = "";
+		try {
+			if (request.getYoutube().size() != 0) {
+				// Get Last ID of Youtube from DB
+				String lastId = "";
+				try {
+					Class.forName("org.postgresql.Driver");
+					Connection connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
+					Statement statement = connection.createStatement();
+					ResultSet resultSet;
+					resultSet = statement.executeQuery("SELECT MAX(id) FROM tbl_youtube");
+					while (resultSet.next()) {
+						lastId = resultSet.getString("max");
+					}
+					statement.close();
+					connection.close();
+				} catch (SQLException | ClassNotFoundException e) {
+					response.setCode(500);
+					response.setMessage(e.getMessage());
+					
+					// Write log
+					try {
+						log.info("=======> AddNewContent Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+					} catch (JsonProcessingException e2) {
+						e2.printStackTrace();
+					}
+					
+					return new ResponseEntity<ContentResponse>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+				}
+				String prefix = lastId.substring(0, 2); // Extracts prefix
+		        int number = Integer.parseInt(lastId.substring(2)); // Extracts number
+		        int i = 0;
+		        
+				for (YoutubeDto youtube : request.getYoutube()) {
+					i++;
+					String newId = prefix + String.format("%05d", number + i); // Generates new ID
+					insertYoutube += "SELECT insert_into_tbl_youtube('" + newId + "', '" + youtube.getTitle() + "', '" + youtube.getKh_title() + "', '" + youtube.getVideo_url() + "', '" + youtube.getDuration() + "', '" + youtube.getPublish_date() + "', '" + youtube.getThumbnail_url() + "', '" + youtube.getThumbnail_name() + "', '" + content_id + "');";
+				}
+			}
+		} catch (Exception e) {}
+		
+		String insertScripts = insertYoutube;
+		String insertResult = "";
+		// Write log
+		log.info("=======> AddNewYoutube DB Script Request:\r\n" + insertScripts + "\r\n");
+		
+		try {
+			
+			Class.forName("org.postgresql.Driver");
+			Connection connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
+			Statement statement = connection.createStatement();
+			
+			// Separate insertScripts
+			for (String script : insertScripts.split(";")) {
+                String trimmedScript = script.trim();
+                if (!trimmedScript.isEmpty()) {
+                	// Write log
+                	log.info("=======> DB Script Executed: " + trimmedScript + "\r\n");
+                    statement.execute(trimmedScript);
+                }
+            }
+			insertResult = "Record added successfully";
+
+			statement.close();
+			connection.close();
+
+		} catch (SQLException | ClassNotFoundException e) {
+			response.setCode(500);
+			response.setMessage(e.getMessage());
+			
+			// Write log
+			try {
+				log.info("=======> AddNewYoutube Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+			} catch (JsonProcessingException e2) {
+				e2.printStackTrace();
+			}
+			
+			return new ResponseEntity<ContentResponse>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
+		response.setCode(200);
+		response.setMessage(insertResult);
+		
+		// Write log
+		try {
+			log.info("=======> AddNewYoutube Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		
+		return new ResponseEntity<ContentResponse>(response, HttpStatus.OK);
+	}
+	
+	// Not Use
+	@SuppressWarnings({ "rawtypes" })
+	@ResponseBody
+	public ResponseEntity RemoveDescription(String id, String content_id) {
+		// Write log
+		log.info("=======> RemoveDescription Request: id=" + id + ", content_id=" + content_id + "\r\n");
+		ContentResponse response = new ContentResponse();
+		
+		String updateDescription = "UPDATE tbl_description "
+				+ "SET "
+				+ "content_id = '" + content_id + ".blocked' "
+				+ "WHERE id = '" + id + "' AND content_id = '" + content_id + "';";
+		String updateResult = "";
+		// Write log
+		log.info("=======> RemoveDescription DB Script Request:\r\n" + updateDescription + "\r\n");
+		
+		try {
+			
+			Class.forName("org.postgresql.Driver");
+			Connection connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
+			// Create a prepared statement for the update script
+			PreparedStatement preparedStatement = connection.prepareStatement(updateDescription);
+			// Execute the update statement
+			int rowsAffected = preparedStatement.executeUpdate();
+			if (rowsAffected > 0) {
+				updateResult = "Record updated successfully";
+			} else {
+				updateResult = "No record found to update";
+			}
+
+			preparedStatement.close();
+			connection.close();
+
+		} catch (SQLException | ClassNotFoundException e) {
+			response.setCode(500);
+			response.setMessage(e.getMessage());
+			
+			// Write log
+			try {
+				log.info("=======> RemoveDescription Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+			} catch (JsonProcessingException e2) {
+				e2.printStackTrace();
+			}
+			
+			return new ResponseEntity<ContentResponse>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
+		response.setCode(200);
+		response.setMessage(updateResult);
+		
+		// Write log
+		try {
+			log.info("=======> RemoveDescription Response: " + objectMapper.writeValueAsString(response) + "\r\n");
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}

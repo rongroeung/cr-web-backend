@@ -69,4 +69,22 @@ public class ServiceController {
 		return backend.AddNewYoutube(req);
 	}
 	
+	@SuppressWarnings("rawtypes")
+	@GetMapping(value = "/cr-web-backend/api/v1/removeDescription", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity RemoveDescription(@RequestParam("id") String id, @RequestParam("content_id") String content_id) {
+		return backend.RemoveDescription(id, content_id);
+	}
+	
+	@SuppressWarnings("rawtypes")
+	@GetMapping(value = "/cr-web-backend/api/v1/removeMedia", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity RemoveMedia(@RequestParam("id") String id, @RequestParam("content_id") String content_id) {
+		return backend.RemoveMedia(id, content_id);
+	}
+	
+	@SuppressWarnings("rawtypes")
+	@GetMapping(value = "/cr-web-backend/api/v1/removeYoutube", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity RemoveYoutube(@RequestParam("id") String id, @RequestParam("content_id") String content_id) {
+		return backend.RemoveYoutube(id, content_id);
+	}
+	
 }

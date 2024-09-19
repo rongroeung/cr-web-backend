@@ -65,7 +65,7 @@ public class BackendService {
 		GetAllContentIdResponseDto responseDto = new GetAllContentIdResponseDto();
 		ArrayList<String> content_id = new ArrayList<>();
 		
-		String queryContent = "SELECT id FROM tbl_content ORDER BY id ASC";
+		String queryContent = "SELECT id FROM tbl_content WHERE blocked != true ORDER BY id ASC";
 		
 		try {
 			
@@ -123,10 +123,10 @@ public class BackendService {
 		ArrayList<GetContentByIdMediaResponseDto> medium = new ArrayList<>();
 		ArrayList<GetContentByIdYoutubeResponseDto> youtubes = new ArrayList<>();
 		
-		String queryContent = "SELECT * FROM tbl_content WHERE id = '" + id + "'";
-		String queryDescription = "SELECT * FROM tbl_description WHERE content_id = '" + id + "' ORDER BY id ASC";
-		String queryMedia = "SELECT * FROM tbl_media WHERE content_id = '" + id + "' ORDER BY id ASC";
-		String queryYoutube = "SELECT * FROM tbl_youtube WHERE content_id = '" + id + "' ORDER BY id ASC";
+		String queryContent = "SELECT * FROM tbl_content WHERE id = '" + id + "' AND blocked != true";
+		String queryDescription = "SELECT * FROM tbl_description WHERE content_id = '" + id + "' AND blocked != true ORDER BY id ASC";
+		String queryMedia = "SELECT * FROM tbl_media WHERE content_id = '" + id + "' AND blocked != true ORDER BY id ASC";
+		String queryYoutube = "SELECT * FROM tbl_youtube WHERE content_id = '" + id + "' AND blocked != true ORDER BY id ASC";
 		
 		String language = "";
 		if (lang.equals("kh")) {
@@ -245,10 +245,10 @@ public class BackendService {
 		ArrayList<MediaDto> medium = new ArrayList<>();
 		ArrayList<YoutubeDto> youtubes = new ArrayList<>();
 		
-		String queryContent = "SELECT * FROM tbl_content WHERE id = '" + id + "'";
-		String queryDescription = "SELECT * FROM tbl_description WHERE content_id = '" + id + "' ORDER BY id ASC";
-		String queryMedia = "SELECT * FROM tbl_media WHERE content_id = '" + id + "' ORDER BY id ASC";
-		String queryYoutube = "SELECT * FROM tbl_youtube WHERE content_id = '" + id + "' ORDER BY id ASC";
+		String queryContent = "SELECT * FROM tbl_content WHERE id = '" + id + "' AND blocked != true";
+		String queryDescription = "SELECT * FROM tbl_description WHERE content_id = '" + id + "' AND blocked != true ORDER BY id ASC";
+		String queryMedia = "SELECT * FROM tbl_media WHERE content_id = '" + id + "' AND blocked != true ORDER BY id ASC";
+		String queryYoutube = "SELECT * FROM tbl_youtube WHERE content_id = '" + id + "' AND blocked != true ORDER BY id ASC";
 		
 		try {
 			
@@ -373,7 +373,7 @@ public class BackendService {
 		}
 		
 		String content_id = request.getId();
-		String insertContent = "SELECT insert_into_tbl_content('" + content_id + "', '" + request.getTitle() + "', '" + request.getKh_title() + "', '" + request.getSub_title() + "', '" + request.getKh_sub_title() + "');";
+		String insertContent = "SELECT insert_into_tbl_content('" + content_id + "', '" + request.getTitle() + "', '" + request.getKh_title() + "', '" + request.getSub_title() + "', '" + request.getKh_sub_title() + "', false);";
 		String insertDescription = "";
 		String insertMedia = "";
 		String insertYoutube = "";
@@ -413,7 +413,7 @@ public class BackendService {
 				for (DescriptionDto description : request.getDescription()) {
 					i++;
 					String newId = prefix + String.format("%05d", number + i); // Generates new ID
-					insertDescription += "SELECT insert_into_tbl_description('" + newId + "', '" + description.getText() + "', '" + description.getKh_text() + "', '" + content_id + "');";
+					insertDescription += "SELECT insert_into_tbl_description('" + newId + "', '" + description.getText() + "', '" + description.getKh_text() + "', false, '" + content_id + "');";
 				}
 			}
 		} catch (Exception e) {}
@@ -453,7 +453,7 @@ public class BackendService {
 				for (MediaDto media : request.getMedia()) {
 					i++;
 					String newId = prefix + String.format("%05d", number + i); // Generates new ID
-					insertMedia += "SELECT insert_into_tbl_media('" + newId + "', '" + media.getUrl() + "', '" + media.getName() + "', '" + content_id + "');";
+					insertMedia += "SELECT insert_into_tbl_media('" + newId + "', '" + media.getUrl() + "', '" + media.getName() + "', false, '" + content_id + "');";
 				}
 			}
 		} catch (Exception e) {}
@@ -493,7 +493,7 @@ public class BackendService {
 				for (YoutubeDto youtube : request.getYoutube()) {
 					i++;
 					String newId = prefix + String.format("%05d", number + i); // Generates new ID
-					insertYoutube += "SELECT insert_into_tbl_youtube('" + newId + "', '" + youtube.getTitle() + "', '" + youtube.getKh_title() + "', '" + youtube.getVideo_url() + "', '" + youtube.getDuration() + "', '" + youtube.getPublish_date() + "', '" + youtube.getThumbnail_url() + "', '" + youtube.getThumbnail_name() + "', '" + content_id + "');";
+					insertYoutube += "SELECT insert_into_tbl_youtube('" + newId + "', '" + youtube.getTitle() + "', '" + youtube.getKh_title() + "', '" + youtube.getVideo_url() + "', '" + youtube.getDuration() + "', '" + youtube.getPublish_date() + "', '" + youtube.getThumbnail_url() + "', '" + youtube.getThumbnail_name() + "', false, '" + content_id + "');";
 				}
 			}
 		} catch (Exception e) {}
@@ -695,7 +695,7 @@ public class BackendService {
 			ResultSet resultSet;
 			
 			// Get Content from DB
-			resultSet = statement.executeQuery("SELECT * FROM tbl_content WHERE id = '" + content_id + "'");
+			resultSet = statement.executeQuery("SELECT * FROM tbl_content WHERE id = '" + content_id + "' AND blocked != true");
 			while (resultSet.next()) {
 				responseDto.setId(resultSet.getString("id"));
 			}
@@ -768,7 +768,7 @@ public class BackendService {
 				for (DescriptionDto description : request.getDescription()) {
 					i++;
 					String newId = prefix + String.format("%05d", number + i); // Generates new ID
-					insertDescription += "SELECT insert_into_tbl_description('" + newId + "', '" + description.getText() + "', '" + description.getKh_text() + "', '" + content_id + "');";
+					insertDescription += "SELECT insert_into_tbl_description('" + newId + "', '" + description.getText() + "', '" + description.getKh_text() + "', false, '" + content_id + "');";
 				}
 			}
 		} catch (Exception e) {}
@@ -851,7 +851,7 @@ public class BackendService {
 			ResultSet resultSet;
 			
 			// Get Content from DB
-			resultSet = statement.executeQuery("SELECT * FROM tbl_content WHERE id = '" + content_id + "'");
+			resultSet = statement.executeQuery("SELECT * FROM tbl_content WHERE id = '" + content_id + "' AND blocked != true");
 			while (resultSet.next()) {
 				responseDto.setId(resultSet.getString("id"));
 			}
@@ -924,7 +924,7 @@ public class BackendService {
 				for (MediaDto media : request.getMedia()) {
 					i++;
 					String newId = prefix + String.format("%05d", number + i); // Generates new ID
-					insertMedia += "SELECT insert_into_tbl_media('" + newId + "', '" + media.getUrl() + "', '" + media.getName() + "', '" + content_id + "');";
+					insertMedia += "SELECT insert_into_tbl_media('" + newId + "', '" + media.getUrl() + "', '" + media.getName() + "', false, '" + content_id + "');";
 				}
 			}
 		} catch (Exception e) {}
@@ -1007,7 +1007,7 @@ public class BackendService {
 			ResultSet resultSet;
 			
 			// Get Content from DB
-			resultSet = statement.executeQuery("SELECT * FROM tbl_content WHERE id = '" + content_id + "'");
+			resultSet = statement.executeQuery("SELECT * FROM tbl_content WHERE id = '" + content_id + "' AND blocked != true");
 			while (resultSet.next()) {
 				responseDto.setId(resultSet.getString("id"));
 			}
@@ -1080,7 +1080,7 @@ public class BackendService {
 				for (YoutubeDto youtube : request.getYoutube()) {
 					i++;
 					String newId = prefix + String.format("%05d", number + i); // Generates new ID
-					insertYoutube += "SELECT insert_into_tbl_youtube('" + newId + "', '" + youtube.getTitle() + "', '" + youtube.getKh_title() + "', '" + youtube.getVideo_url() + "', '" + youtube.getDuration() + "', '" + youtube.getPublish_date() + "', '" + youtube.getThumbnail_url() + "', '" + youtube.getThumbnail_name() + "', '" + content_id + "');";
+					insertYoutube += "SELECT insert_into_tbl_youtube('" + newId + "', '" + youtube.getTitle() + "', '" + youtube.getKh_title() + "', '" + youtube.getVideo_url() + "', '" + youtube.getDuration() + "', '" + youtube.getPublish_date() + "', '" + youtube.getThumbnail_url() + "', '" + youtube.getThumbnail_name() + "', false, '" + content_id + "');";
 				}
 			}
 		} catch (Exception e) {}
@@ -1137,7 +1137,6 @@ public class BackendService {
 		return new ResponseEntity<ContentResponse>(response, HttpStatus.OK);
 	}
 	
-	// Not Use
 	@SuppressWarnings({ "rawtypes" })
 	@ResponseBody
 	public ResponseEntity RemoveDescription(String id, String content_id) {
@@ -1147,7 +1146,7 @@ public class BackendService {
 		
 		String updateDescription = "UPDATE tbl_description "
 				+ "SET "
-				+ "content_id = '" + content_id + ".blocked' "
+				+ "blocked = true "
 				+ "WHERE id = '" + id + "' AND content_id = '" + content_id + "';";
 		String updateResult = "";
 		// Write log
@@ -1190,6 +1189,124 @@ public class BackendService {
 		// Write log
 		try {
 			log.info("=======> RemoveDescription Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		
+		return new ResponseEntity<ContentResponse>(response, HttpStatus.OK);
+	}
+	
+	@SuppressWarnings({ "rawtypes" })
+	@ResponseBody
+	public ResponseEntity RemoveMedia(String id, String content_id) {
+		// Write log
+		log.info("=======> RemoveMedia Request: id=" + id + ", content_id=" + content_id + "\r\n");
+		ContentResponse response = new ContentResponse();
+		
+		String updateMedia = "UPDATE tbl_media "
+				+ "SET "
+				+ "blocked = true "
+				+ "WHERE id = '" + id + "' AND content_id = '" + content_id + "';";
+		String updateResult = "";
+		// Write log
+		log.info("=======> RemoveMedia DB Script Request:\r\n" + updateMedia + "\r\n");
+		
+		try {
+			
+			Class.forName("org.postgresql.Driver");
+			Connection connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
+			// Create a prepared statement for the update script
+			PreparedStatement preparedStatement = connection.prepareStatement(updateMedia);
+			// Execute the update statement
+			int rowsAffected = preparedStatement.executeUpdate();
+			if (rowsAffected > 0) {
+				updateResult = "Record updated successfully";
+			} else {
+				updateResult = "No record found to update";
+			}
+
+			preparedStatement.close();
+			connection.close();
+
+		} catch (SQLException | ClassNotFoundException e) {
+			response.setCode(500);
+			response.setMessage(e.getMessage());
+			
+			// Write log
+			try {
+				log.info("=======> RemoveMedia Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+			} catch (JsonProcessingException e2) {
+				e2.printStackTrace();
+			}
+			
+			return new ResponseEntity<ContentResponse>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
+		response.setCode(200);
+		response.setMessage(updateResult);
+		
+		// Write log
+		try {
+			log.info("=======> RemoveMedia Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		
+		return new ResponseEntity<ContentResponse>(response, HttpStatus.OK);
+	}
+	
+	@SuppressWarnings({ "rawtypes" })
+	@ResponseBody
+	public ResponseEntity RemoveYoutube(String id, String content_id) {
+		// Write log
+		log.info("=======> RemoveYoutube Request: id=" + id + ", content_id=" + content_id + "\r\n");
+		ContentResponse response = new ContentResponse();
+		
+		String updateYoutube = "UPDATE tbl_youtube "
+				+ "SET "
+				+ "blocked = true "
+				+ "WHERE id = '" + id + "' AND content_id = '" + content_id + "';";
+		String updateResult = "";
+		// Write log
+		log.info("=======> RemoveYoutube DB Script Request:\r\n" + updateYoutube + "\r\n");
+		
+		try {
+			
+			Class.forName("org.postgresql.Driver");
+			Connection connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
+			// Create a prepared statement for the update script
+			PreparedStatement preparedStatement = connection.prepareStatement(updateYoutube);
+			// Execute the update statement
+			int rowsAffected = preparedStatement.executeUpdate();
+			if (rowsAffected > 0) {
+				updateResult = "Record updated successfully";
+			} else {
+				updateResult = "No record found to update";
+			}
+
+			preparedStatement.close();
+			connection.close();
+
+		} catch (SQLException | ClassNotFoundException e) {
+			response.setCode(500);
+			response.setMessage(e.getMessage());
+			
+			// Write log
+			try {
+				log.info("=======> RemoveYoutube Response: " + objectMapper.writeValueAsString(response) + "\r\n");
+			} catch (JsonProcessingException e2) {
+				e2.printStackTrace();
+			}
+			
+			return new ResponseEntity<ContentResponse>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
+		response.setCode(200);
+		response.setMessage(updateResult);
+		
+		// Write log
+		try {
+			log.info("=======> RemoveYoutube Response: " + objectMapper.writeValueAsString(response) + "\r\n");
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}

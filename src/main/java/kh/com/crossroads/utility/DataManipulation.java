@@ -6,6 +6,6 @@ public class DataManipulation {
 //	}
 
 	public static String replaceSingleQuote(String data) {
-		return data.replaceAll("'", "''");
+		return data.replaceAll("'", "''").replaceAll(";", ",");
 	}
 }

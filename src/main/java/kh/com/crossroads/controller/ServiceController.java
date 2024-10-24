@@ -19,8 +19,12 @@ public class ServiceController {
 	
 	@SuppressWarnings("rawtypes")
 	@GetMapping(value = "/cr-web-backend/api/v1/getAllContentId", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity GetAllContentId() {
-		return backend.GetAllContentId();
+	public ResponseEntity GetAllContentId(@RequestParam(name = "sort", required = false) String sort) {
+		// Set sort = '' if sort was not input
+		if (sort == null) {
+			sort = "";
+		}
+		return backend.GetAllContentId(sort);
 	}
 	
 	@SuppressWarnings("rawtypes")

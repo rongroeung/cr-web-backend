@@ -33,6 +33,7 @@ import kh.com.crossroads.builder.getContentById.GetContentByIdMediaResponseDto;
 import kh.com.crossroads.builder.getContentById.GetContentByIdResponse;
 import kh.com.crossroads.builder.getContentById.GetContentByIdResponseDto;
 import kh.com.crossroads.builder.getContentById.GetContentByIdYoutubeResponseDto;
+import kh.com.crossroads.utility.CurrentDateTime;
 import kh.com.crossroads.utility.DataManipulation;
 
 @Service
@@ -58,14 +59,23 @@ public class BackendService {
 	
 	@SuppressWarnings({ "rawtypes" })
 	@ResponseBody
-	public ResponseEntity GetAllContentId() {
+	public ResponseEntity GetAllContentId(String sort) {
 		// Write log
 		log.info("=======> GetAllContentId Request: endpoint=/cr-web-backend/api/v1/getAllContentId\r\n");
 		GetAllContentIdResponse response = new GetAllContentIdResponse();
 		GetAllContentIdResponseDto responseDto = new GetAllContentIdResponseDto();
 		ArrayList<String> content_id = new ArrayList<>();
 		
-		String queryContent = "SELECT id FROM tbl_content WHERE blocked != true ORDER BY id ASC";
+		// Validate sort condition
+		String sortBy = "id ASC";
+		if (sort.equals("date-desc")) {
+			sortBy = "create_time DESC";
+		}
+		else if (sort.equals("date-asc")) {
+			sortBy = "create_time ASC";
+		}
+		
+		String queryContent = "SELECT id FROM tbl_content WHERE blocked != true ORDER BY " + sortBy;
 		
 		try {
 			
@@ -373,7 +383,7 @@ public class BackendService {
 		}
 		
 		String content_id = request.getId();
-		String insertContent = "SELECT insert_into_tbl_content('" + content_id + "', '" + request.getTitle() + "', '" + request.getKh_title() + "', '" + request.getSub_title() + "', '" + request.getKh_sub_title() + "', false);";
+		String insertContent = "SELECT insert_into_tbl_content('" + content_id + "', '" + request.getTitle() + "', '" + request.getKh_title() + "', '" + request.getSub_title() + "', '" + request.getKh_sub_title() + "', '" + CurrentDateTime.getCurrentDateTime() +"', false);";
 		String insertDescription = "";
 		String insertMedia = "";
 		String insertYoutube = "";

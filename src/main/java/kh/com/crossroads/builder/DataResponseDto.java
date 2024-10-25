@@ -17,6 +17,8 @@ public class DataResponseDto {
 	private String sub_title;
 	@JsonProperty("kh_sub_title")
 	private String kh_sub_title;
+	@JsonProperty("create_time")
+	private String create_time;
 	@JsonProperty("description")
 	private ArrayList<DescriptionDto> description;
 	@JsonProperty("media")
@@ -53,6 +55,12 @@ public class DataResponseDto {
 	}
 	public void setKh_sub_title(String kh_sub_title) {
 		this.kh_sub_title = kh_sub_title;
+	}
+	public String getCreate_time() {
+		return create_time;
+	}
+	public void setCreate_time(String create_time) {
+		this.create_time = create_time;
 	}
 	public ArrayList<DescriptionDto> getDescription() {
 		return description;

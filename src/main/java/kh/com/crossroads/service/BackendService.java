@@ -33,7 +33,6 @@ import kh.com.crossroads.builder.getContentById.GetContentByIdMediaResponseDto;
 import kh.com.crossroads.builder.getContentById.GetContentByIdResponse;
 import kh.com.crossroads.builder.getContentById.GetContentByIdResponseDto;
 import kh.com.crossroads.builder.getContentById.GetContentByIdYoutubeResponseDto;
-import kh.com.crossroads.utility.CurrentDateTime;
 import kh.com.crossroads.utility.DataManipulation;
 
 @Service
@@ -156,6 +155,7 @@ public class BackendService {
 				responseDto.setId(resultSet.getString("id"));
 				responseDto.setTitle(resultSet.getString(language + "title"));
 				responseDto.setSub_title(resultSet.getString(language + "sub_title"));
+				responseDto.setCreate_time(resultSet.getString("create_time"));
 			}
 			
 			// Validate content id not found
@@ -275,6 +275,7 @@ public class BackendService {
 				responseDto.setKh_title(resultSet.getString("kh_title"));
 				responseDto.setSub_title(resultSet.getString("sub_title"));
 				responseDto.setKh_sub_title(resultSet.getString("kh_sub_title"));
+				responseDto.setCreate_time(resultSet.getString("create_time"));
 			}
 			
 			// Validate content id not found
@@ -383,7 +384,7 @@ public class BackendService {
 		}
 		
 		String content_id = request.getId();
-		String insertContent = "SELECT insert_into_tbl_content('" + content_id + "', '" + request.getTitle() + "', '" + request.getKh_title() + "', '" + request.getSub_title() + "', '" + request.getKh_sub_title() + "', '" + CurrentDateTime.getCurrentDateTime() +"', false);";
+		String insertContent = "SELECT insert_into_tbl_content('" + content_id + "', '" + request.getTitle() + "', '" + request.getKh_title() + "', '" + request.getSub_title() + "', '" + request.getKh_sub_title() + "', '" + request.getCreate_time() +"', false);";
 		String insertDescription = "";
 		String insertMedia = "";
 		String insertYoutube = "";
@@ -583,7 +584,8 @@ public class BackendService {
 				+ "title = '" + request.getTitle() + "', "
 				+ "kh_title = '" + request.getKh_title() + "', "
 				+ "sub_title = '" + request.getSub_title() + "', "
-				+ "kh_sub_title = '" + request.getKh_sub_title() + "' "
+				+ "kh_sub_title = '" + request.getKh_sub_title() + "', "
+				+ "create_time = '" + request.getCreate_time() + "' "
 				+ "WHERE id = '" + content_id + "';";
 		String updateDescription = "";
 		String updateMedia = "";

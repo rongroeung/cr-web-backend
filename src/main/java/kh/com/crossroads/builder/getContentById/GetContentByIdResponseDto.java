@@ -13,6 +13,8 @@ public class GetContentByIdResponseDto {
 	private String title;
 	@JsonProperty("sub_title")
 	private String sub_title;
+	@JsonProperty("create_time")
+	private String create_time;
 	@JsonProperty("description")
 	private ArrayList<GetContentByIdDescriptionResponseDto> description;
 	@JsonProperty("media")
@@ -37,6 +39,12 @@ public class GetContentByIdResponseDto {
 	}
 	public void setSub_title(String sub_title) {
 		this.sub_title = sub_title;
+	}
+	public String getCreate_time() {
+		return create_time;
+	}
+	public void setCreate_time(String create_time) {
+		this.create_time = create_time;
 	}
 	public ArrayList<GetContentByIdDescriptionResponseDto> getDescription() {
 		return description;

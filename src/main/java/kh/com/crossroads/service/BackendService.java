@@ -193,6 +193,7 @@ public class BackendService {
 				media.setId(resultSet.getString("id"));
 				media.setUrl(resultSet.getString("url"));
 				media.setName(resultSet.getString("name"));
+				media.setNote(resultSet.getString("note"));
 				medium.add(media);
 			}
 			
@@ -314,6 +315,7 @@ public class BackendService {
 				media.setId(resultSet.getString("id"));
 				media.setUrl(resultSet.getString("url"));
 				media.setName(resultSet.getString("name"));
+				media.setNote(resultSet.getString("note"));
 				medium.add(media);
 			}
 			
@@ -464,7 +466,7 @@ public class BackendService {
 				for (MediaDto media : request.getMedia()) {
 					i++;
 					String newId = prefix + String.format("%05d", number + i); // Generates new ID
-					insertMedia += "SELECT insert_into_tbl_media('" + newId + "', '" + media.getUrl() + "', '" + media.getName() + "', false, '" + content_id + "');";
+					insertMedia += "SELECT insert_into_tbl_media('" + newId + "', '" + media.getUrl() + "', '" + media.getName() + "', '" + media.getNote() + "', false, '" + content_id + "');";
 				}
 			}
 		} catch (Exception e) {}
@@ -609,7 +611,8 @@ public class BackendService {
 					updateMedia += "UPDATE tbl_media "
 							+ "SET "
 							+ "url = '" + media.getUrl() + "', "
-							+ "name = '" + media.getName() + "' "
+							+ "name = '" + media.getName() + "', "
+							+ "note = '" + media.getNote() + "' "
 							+ "WHERE id = '" + media.getId() + "' AND content_id = '" + content_id + "';";
 				}
 			}
@@ -936,7 +939,7 @@ public class BackendService {
 				for (MediaDto media : request.getMedia()) {
 					i++;
 					String newId = prefix + String.format("%05d", number + i); // Generates new ID
-					insertMedia += "SELECT insert_into_tbl_media('" + newId + "', '" + media.getUrl() + "', '" + media.getName() + "', false, '" + content_id + "');";
+					insertMedia += "SELECT insert_into_tbl_media('" + newId + "', '" + media.getUrl() + "', '" + media.getName() + "', '" + media.getNote() + "', false, '" + content_id + "');";
 				}
 			}
 		} catch (Exception e) {}

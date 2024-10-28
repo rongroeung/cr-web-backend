@@ -11,6 +11,8 @@ public class MediaDto {
 	private String url;
 	@JsonProperty("name")
 	private String name;
+	@JsonProperty("note")
+	private String note;
 	
 	public String getId() {
 		return id;
@@ -29,5 +31,11 @@ public class MediaDto {
 	}
 	public void setName(String name) {
 		this.name = name;
+	}
+	public String getNote() {
+		return note;
+	}
+	public void setNote(String note) {
+		this.note = note;
 	}
 }

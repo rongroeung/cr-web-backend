@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   crweb-backend-service:
+    image: cr-web-backend:1.0.0
     restart: always  # Optional: configure restart policy
     env_file:
       - .env
